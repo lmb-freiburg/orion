@@ -14,3 +14,8 @@ If you use this code for research please cite:
       url          = "http://lmb.informatik.uni-freiburg.de/Publications/2017/SZB17a"
     }
 
+
+Caffe Installation
+------------------
+
+Please download, build and install the version of caffe introduced [here](https://lmb.informatik.uni-freiburg.de/resources/opensource/unet.en.html) -- we use it for the provided 3D augmentation capabilities.
