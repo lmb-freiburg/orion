@@ -1,6 +1,8 @@
 # ORION
 Here you can find the code for the BMVC 2017 version of "Orientation-boosted Voxel Nets for 3D Object Recognition", a.k.a ORION.
 
+![teaser](https://lmb.informatik.uni-freiburg.de/Publications/2017/SZB17a/teaser_w.png)
+
 If you use this code for research please cite:
    
     @InProceedings{SZB17a,
@@ -11,3 +13,4 @@ If you use this code for research please cite:
       year         = "2017",
       url          = "http://lmb.informatik.uni-freiburg.de/Publications/2017/SZB17a"
     }
+
