@@ -3,7 +3,7 @@ Here you can find the code for the BMVC 2017 version of "Orientation-boosted Vox
 
 If you use this code for research please cite:
    
-    @InProceedings{UZUMIDB17,
+    @InProceedings{SZB17a,
       author       = "N. Sedaghat and M. Zolfaghari and E. Amiri and T. Brox",
       title        = "Orientation-boosted voxel nets for 3D object recognition",
       booktitle    = "British Machine Vision Conference (BMVC)",
