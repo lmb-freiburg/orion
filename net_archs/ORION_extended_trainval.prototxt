@@ -1,0 +1,499 @@
+# ----------- Train phase data + augmentation ---------------
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  top: "label_pose"
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+    source: "train.hdf5.txt"
+    batch_size: 32
+  }
+}
+layer {	
+    type: "CreateDeformation";
+    name: "augment";
+    top: "def";
+    create_deformation_param {
+	batch_size: 32; 
+	nz: 32;
+	ny: 32;
+	nx: 32;
+	ncomponents: 3;
+	random_offset_from { v:0 v:0 v:0 };
+	random_offset_to   { v:4 v:4 v:4 };
+   };
+
+    include: { phase: TRAIN };
+};
+
+
+# ----------- Test phase data + augmentation ---------------
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  top: "label_pose"
+  include {
+    phase: TEST
+  }
+  hdf5_data_param {
+    source: "val.hdf5.txt"
+    batch_size: 908
+  }
+}
+layer {	
+    type: "CreateDeformation";
+    name: "augment";
+    top: "def";
+    create_deformation_param {
+	batch_size: 908; 
+	nz: 32;
+	ny: 32;
+	nx: 32;
+	ncomponents: 3;
+	random_offset_from { v:2 v:2 v:2 };
+	random_offset_to   { v:2 v:2 v:2 };
+   };
+
+    include: { phase: TEST };
+};
+
+
+# ----------- Apply the augmentation ---------------
+layer { 
+    type: "ApplyDeformation";
+    name: "def_data-d0a";
+    bottom: "data";
+    bottom: "def";
+    top: "data_aug";
+    apply_deformation_param  { 
+	interpolation: "nearest"
+	extrapolation: "zero"
+    };
+}
+
+
+# ----------- 1st layer group ---------------
+layer {
+  name: "conv1a"
+  type: "Convolution"
+  bottom: "data_aug"
+  top: "conv1a"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    num_output: 32
+    kernel_size: 3
+    pad: 0
+    stride: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "bn1"
+  type: "BatchNorm"
+  bottom: "conv1a"
+  top: "conv1a"
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+}
+
+layer {
+  name: "scale1"
+  type: "Scale"
+  bottom: "conv1a"
+  top: "conv1a"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  name: "relu1a"
+  type: "ReLU"
+  bottom: "conv1a"
+  top: "conv1a"
+  relu_param
+    {
+	negative_slope: 0.1
+    }
+}
+
+layer {
+  name: "drop1"
+  type: "Dropout"
+  bottom: "conv1a"
+  top: "conv1a"
+  dropout_param {
+    dropout_ratio: 0.2
+  }
+}
+
+
+# ----------- 2nd layer group ---------------
+layer {
+  name: "conv2a"
+  type: "Convolution"
+  bottom: "conv1a"
+  top: "conv2a"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "bn2"
+  type: "BatchNorm"
+  bottom: "conv2a"
+  top: "conv2a"
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+}
+
+layer {
+  name: "scale2"
+  type: "Scale"
+  bottom: "conv2a"
+  top: "conv2a"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  name: "relu2a"
+  type: "ReLU"
+  bottom: "conv2a"
+  top: "conv2a"
+  relu_param
+    {
+	negative_slope: 0.1
+    }
+}
+
+layer {
+  name: "drop2"
+  type: "Dropout"
+  bottom: "conv2a"
+  top: "conv2a"
+  dropout_param {
+    dropout_ratio: 0.3
+  }
+}
+
+# ----------- 3rd layer group ---------------
+layer {
+  name: "conv3a"
+  type: "Convolution"
+  bottom: "conv2a"
+  top: "conv3a"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "bn3"
+  type: "BatchNorm"
+  bottom: "conv3a"
+  top: "conv3a"
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+}
+
+layer {
+  name: "scale3"
+  type: "Scale"
+  bottom: "conv3a"
+  top: "conv3a"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  name: "relu3a"
+  type: "ReLU"
+  bottom: "conv3a"
+  top: "conv3a"
+  relu_param
+    {
+	negative_slope: 0.1
+    }
+}
+
+layer {
+  name: "drop3"
+  type: "Dropout"
+  bottom: "conv3a"
+  top: "conv3a"
+  dropout_param {
+    dropout_ratio: 0.4
+  }
+}
+
+
+# ------------- 4th layer group --------------
+layer {
+  name: "conv4a"
+  type: "Convolution"
+  bottom: "conv3a"
+  top: "conv4a"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    num_output: 256
+    kernel_size: 3
+    pad: 0
+    weight_filler {
+      type: "msra"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "bn4"
+  type: "BatchNorm"
+  bottom: "conv4a"
+  top: "conv4a"
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+}
+
+layer {
+  name: "scale4"
+  type: "Scale"
+  bottom: "conv4a"
+  top: "conv4a"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  name: "relu4a"
+  type: "ReLU"
+  bottom: "conv4a"
+  top: "conv4a"
+  relu_param
+    {
+	negative_slope: 0.1
+    }
+}
+
+layer {
+  name: "pool4"
+  type: "Pooling"
+  bottom: "conv4a"
+  top: "pool4a"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+
+layer {
+  name: "drop4"
+  type: "Dropout"
+  bottom: "pool4a"
+  top: "pool4a"
+  dropout_param {
+    dropout_ratio: 0.6
+  }
+}
+
+# ---------------- fc layers -------------
+layer {
+  name: "fc6"
+  type: "InnerProduct"
+  bottom: "pool4a"
+  top: "fc6"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  inner_product_param {
+    num_output: 128
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu6"
+  type: "ReLU"
+  bottom: "fc6"
+  top: "fc6"
+}
+layer {
+  name: "drop6"
+  type: "Dropout"
+  bottom: "fc6"
+  top: "fc6"
+  dropout_param {
+    dropout_ratio: 0.4
+  }
+}
+
+layer {
+  name: "fc8"
+  type: "InnerProduct"
+  bottom: "fc6"
+  top: "fc8"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "fc8_pose"
+  type: "InnerProduct"
+  bottom: "fc6"
+  top: "fc8_pose"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  inner_product_param {
+    num_output: 105
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "fc8"
+  bottom: "label"
+  top: "loss"
+}
+
+layer {
+  name: "loss_pose"
+  type: "SoftmaxWithLoss"
+  bottom: "fc8_pose"
+  bottom: "label_pose"
+  top: "loss_pose"
+}
+
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "fc8"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+
+layer {
+  name: "accuracy_pose"
+  type: "Accuracy"
+  bottom: "fc8_pose"
+  bottom: "label_pose"
+  top: "accuracy_pose"
+  include {
+    phase: TEST
+  }
+}
