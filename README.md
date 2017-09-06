@@ -23,7 +23,7 @@ Please download, build and install the version of caffe introduced [here](https:
 Modelnet40 Aligned Objects
 ---------------------------
 Modelnet40 aligned objects can be downloaded from the links below.
-If you use this modified dataset, please additionally cite the following work from which we borrowed techniques for the auto-alignment:
+If you use this modified dataset, please cite, in addition to ORION, the following work from which we borrowed techniques for the auto-alignment:
 
     @InProceedings{SB15,
       author       = "N. Sedaghat and T. Brox",
